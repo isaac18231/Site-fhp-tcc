@@ -1,0 +1,1 @@
+document.querySelectorAll('.plan-switch button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.plan-switch button').forEach(b=>b.classList.remove('selected'));button.classList.add('selected');document.getElementById(button.dataset.target).scrollIntoView({behavior:'smooth'})}));

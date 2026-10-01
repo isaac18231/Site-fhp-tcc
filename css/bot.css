@@ -1,0 +1,31 @@
+.bot-fab{position:fixed;right:22px;bottom:22px;z-index:50;width:60px;height:60px;border:0;border-radius:50%;cursor:pointer;color:#fff;font-size:1.6rem;background:linear-gradient(135deg,#7c3aed,#c177ff);box-shadow:0 10px 30px rgba(124,58,237,.55);transition:transform .25s}
+.bot-fab:hover{transform:scale(1.08)}
+.bot-fab::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #c177ff;animation:botPulse 2.4s infinite}
+@keyframes botPulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.6);opacity:0}}
+.bot-panel{position:fixed;right:22px;bottom:96px;z-index:50;width:360px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 120px);display:none;flex-direction:column;overflow:hidden;border:1px solid rgba(205,167,255,.3);border-radius:20px;background:#10091e;box-shadow:0 25px 70px rgba(0,0,0,.6)}
+.bot-panel.open{display:flex;animation:botIn .3s ease}
+@keyframes botIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.bot-head{display:flex;align-items:center;gap:.7rem;padding:1rem;background:linear-gradient(120deg,#5b1cb1,#2a0f52)}
+.bot-avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);font-size:1.3rem}
+.bot-head b{display:block;font-size:.98rem}
+.bot-head small{color:#d9c3f5;font-size:.75rem}
+.bot-close{margin-left:auto;background:none;border:0;color:#fff;font-size:1.2rem;cursor:pointer}
+.bot-body{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.7rem}
+.bot-msg{max-width:86%;padding:.65rem .9rem;border-radius:14px;font-size:.92rem;line-height:1.45;animation:botIn .25s ease}
+.bot-msg a{color:#e2bdff;text-decoration:underline}
+.bot-msg.bot{align-self:flex-start;background:#1c1030;border:1px solid rgba(205,167,255,.15);border-bottom-left-radius:4px}
+.bot-msg.user{align-self:flex-end;background:linear-gradient(135deg,#7c3aed,#a855f7);border-bottom-right-radius:4px}
+.bot-typing{display:flex;gap:4px;padding:.8rem .9rem}
+.bot-typing i{width:7px;height:7px;border-radius:50%;background:#c177ff;animation:botDot 1s infinite}
+.bot-typing i:nth-child(2){animation-delay:.15s}.bot-typing i:nth-child(3){animation-delay:.3s}
+@keyframes botDot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.bot-chips{display:flex;flex-wrap:wrap;gap:.45rem;padding:0 1rem .7rem}
+.bot-chips button{cursor:pointer;border:1px solid #8d5bbb;background:rgba(255,255,255,.04);color:#e8d8fb;border-radius:20px;padding:.38rem .75rem;font-size:.8rem;transition:.2s}
+.bot-chips button:hover{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.bot-form{display:flex;gap:.5rem;padding:.8rem;border-top:1px solid rgba(205,167,255,.15);background:#0c0716}
+.bot-form input{flex:1;min-width:0;font:inherit;font-size:.92rem;color:#fff;background:#090612;border:1px solid #4c3068;border-radius:10px;padding:.65rem .8rem;outline:none}
+.bot-form input:focus{border-color:#c177ff;box-shadow:0 0 0 3px rgba(177,97,255,.18)}
+.bot-form button{border:0;border-radius:10px;padding:0 1rem;cursor:pointer;color:#fff;font-weight:bold;background:linear-gradient(135deg,#7c3aed,#a855f7)}
+.bot-note{padding:0 1rem .6rem;color:#9d8bb5;font-size:.7rem;text-align:center}
+@media(max-width:480px){.bot-panel{right:8px;bottom:88px;height:calc(100vh - 110px)}.bot-fab{right:14px;bottom:14px}}
+@media(prefers-reduced-motion:reduce){.bot-fab::after,.bot-panel.open,.bot-msg{animation:none}}
