@@ -1,1 +1,28 @@
-const demoUsers={admin:{senha:'admin123',nome:'Administrador FHP',nivel:'admin'},funcionario:{senha:'123456',nome:'Equipe FHP',nivel:'funcionario'},cliente:{senha:'123456',nome:'Cliente FHP',nivel:'cliente'}};document.addEventListener('DOMContentLoaded',()=>{const active=JSON.parse(localStorage.getItem('fhpSession')||'null');if(active)location.replace('painel.html');const form=document.querySelector('#login-form'),pass=form.senha,show=document.querySelector('.show-password');show.addEventListener('click',()=>{const visible=pass.type==='text';pass.type=visible?'password':'text';show.setAttribute('aria-label',visible?'Mostrar senha':'Ocultar senha')});document.querySelector('#forgot-password').addEventListener('click',e=>{e.preventDefault();form.querySelector('.login-feedback').textContent='A recuperação é demonstrativa. Use as credenciais indicadas no README.'});form.addEventListener('submit',e=>{e.preventDefault();const user=demoUsers[form.usuario.value.trim().toLowerCase()];const feedback=form.querySelector('.login-feedback');if(!user||user.senha!==pass.value){feedback.textContent='Usuário ou senha inválidos.';return}localStorage.setItem('fhpSession',JSON.stringify({usuario:form.usuario.value.trim().toLowerCase(),nome:user.nome,nivel:user.nivel}));location.href='painel.html'})});
+document.addEventListener('DOMContentLoaded', () => {
+  const api = window.FHP;
+  const form = document.querySelector('#login-form');
+  const params = new URLSearchParams(location.search);
+if (api.session()) location.replace('painel.html');
+
+  if (params.has('plano')) {
+    sessionStorage.setItem('fhpPlanoPendente', params.get('plano'));
+    document.querySelector('#create-account-link').href = `cadastro.html?plano=${encodeURIComponent(params.get('plano'))}`;
+  }
+
+document.querySelector('.show-password').addEventListener('click', () => {
+    const password = form.elements.senha;
+    password.type = password.type === 'password' ? 'text' : 'password';
+  });
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const feedback = form.querySelector('.login-feedback');
+    const user = api.login(form.elements.usuario.value, form.elements.senha.value);
+    if (!user) {
+      feedback.textContent = 'E-mail ou senha inválidos.';
+      return;
+    }
+    const pendingPlan = sessionStorage.getItem('fhpPlanoPendente');
+    location.href = `painel.html${pendingPlan ? `?contratar=${encodeURIComponent(pendingPlan)}` : ''}`;
+  });
+});

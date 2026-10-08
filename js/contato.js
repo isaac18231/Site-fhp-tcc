@@ -1,1 +1,25 @@
-document.addEventListener('DOMContentLoaded',()=>{const form=document.querySelector('#contact-form');if(!form)return;const assunto=new URLSearchParams(location.search).get('assunto');if(assunto)document.querySelector('#assunto').value=assunto;form.addEventListener('submit',event=>{event.preventDefault();const feedback=form.querySelector('.form-feedback'),fields=[...form.querySelectorAll('[required]')];let valid=true;fields.forEach(field=>{const bad=!field.value.trim()||(field.type==='email'&&!/^\S+@\S+\.\S+$/.test(field.value));field.classList.toggle('invalid',bad);valid&&= !bad});if(!valid){feedback.className='form-feedback';feedback.textContent='Revise os campos destacados antes de enviar.';return}const data=Object.fromEntries(new FormData(form));const messages=JSON.parse(localStorage.getItem('fhpMessages')||'[]');messages.unshift({...data,data:new Date().toLocaleDateString('pt-BR'),status:'Novo'});localStorage.setItem('fhpMessages',JSON.stringify(messages));form.reset();feedback.className='form-feedback success';feedback.textContent='Mensagem enviada com sucesso!'});});
+﻿document.addEventListener('DOMContentLoaded',()=>{const form=document.querySelector('#contact-form');
+if(!form)return;
+const A=window.FHP,s=A.session(),assunto=new URLSearchParams(location.search).get('assunto');
+if(s?.nivel==='cliente'){let c=A.read(A.K.clients).find(x=>x.email===s.email);
+form.innerHTML=`<h2>Nova solicitação</h2><label>Assunto<input name="assunto" required value="${A.esc(assunto||'')}" placeholder="Ex.: Internet lenta"></label><label>Mensagem<textarea name="mensagem" required rows="5"></textarea></label><p class="form-feedback" role="alert"></p><button class="btn btn-primary">Enviar mensagem</button><p><a href="painel.html">Acompanhar minhas mensagens →</a></p>`;
+form.onsubmit=e=>{e.preventDefault();
+try{A.send(form.assunto.value,form.mensagem.value);
+form.reset();
+form.querySelector('.form-feedback').textContent='Solicitação enviada! Acompanhe a conversa na sua conta.'}catch(err){form.querySelector('.form-feedback').textContent=err.message}};
+return}if(assunto)document.querySelector('#assunto').value=assunto;
+form.addEventListener('submit',event=>{event.preventDefault();
+const feedback=form.querySelector('.form-feedback'),fields=[...form.querySelectorAll('[required]')];
+let valid=true;
+fields.forEach(field=>{const bad=!field.value.trim()||(field.type==='email'&&!/^\S+@\S+\.\S+$/.test(field.value));
+field.classList.toggle('invalid',bad);
+valid&&=!bad});
+if(!valid){feedback.textContent='Revise os campos destacados antes de enviar.';
+return}const d=Object.fromEntries(new FormData(form)),a=A.read(A.K.tickets);
+a.unshift({id:crypto.randomUUID(),cliente:d.email,nome:d.nome,email:d.email,telefone:d.telefone,data:new Date().toLocaleDateString('pt-BR'),hora:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),assunto:d.assunto,mensagens:[{autor:d.nome,tipo:'cliente',texto:d.mensagem,data:new Date().toLocaleString('pt-BR')}],status:'Aberto'});
+A.write(A.K.tickets,a);
+form.reset();
+feedback.classList.add('success');
+feedback.textContent='Mensagem enviada com sucesso!'});
+});
+

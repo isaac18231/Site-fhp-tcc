@@ -1,1 +1,75 @@
-.contact-layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:4rem}.contact-layout>div>p:not(.eyebrow){color:var(--muted)}.contact-notes{display:grid;gap:.7rem;margin-top:2rem}.contact-notes article{padding:1rem;border-left:2px solid var(--purple);background:rgba(255,255,255,.03)}.contact-notes span{display:block;color:var(--muted);font-size:.9rem}form{padding:1.5rem;border:1px solid var(--line);border-radius:17px;background:#11091f}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}label{display:grid;gap:.35rem;margin-bottom:1rem;font-weight:bold;font-size:.9rem}input,textarea{font:inherit;color:#fff;background:#090612;border:1px solid #4c3068;border-radius:8px;padding:.75rem;outline:none}input:focus,textarea:focus{border-color:#c177ff;box-shadow:0 0 0 3px rgba(177,97,255,.18)}input.invalid,textarea.invalid{border-color:#f57b9d}.form-feedback{min-height:1.4rem;color:#ff9fb8;font-size:.9rem}.form-feedback.success{color:#a8ffbd}@media(max-width:750px){.contact-layout{grid-template-columns:1fr;gap:2rem}.form-row{grid-template-columns:1fr}}
+﻿.contact-layout {
+  display:grid;
+  grid-template-columns:.85fr 1.15fr;
+  gap:4rem
+}
+.contact-layout>div>p:not(.eyebrow) {
+  color:var(--muted)
+}
+.contact-notes {
+  display:grid;
+  gap:.7rem;
+  margin-top:2rem
+}
+.contact-notes article {
+  padding:1rem;
+  border-left:2px solid var(--purple);
+  background:rgba(255,255,255,.03)
+}
+.contact-notes span {
+  display:block;
+  color:var(--muted);
+  font-size:.9rem
+}
+form {
+  padding:1.5rem;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:#11091f
+}
+.form-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem
+}
+label {
+  display:grid;
+  gap:.35rem;
+  margin-bottom:1rem;
+  font-weight:bold;
+  font-size:.9rem
+}
+input,textarea {
+  font:inherit;
+  color:#fff;
+  background:#090612;
+  border:1px solid #4c3068;
+  border-radius:8px;
+  padding:.75rem;
+  outline:none
+}
+input:focus,textarea:focus {
+  border-color:#c177ff;
+  box-shadow:0 0 0 3px rgba(177,97,255,.18)
+}
+input.invalid,textarea.invalid {
+  border-color:#f57b9d
+}
+.form-feedback {
+  min-height:1.4rem;
+  color:#ff9fb8;
+  font-size:.9rem
+}
+.form-feedback.success {
+  color:#a8ffbd
+}
+@media(max-width:750px) {
+  .contact-layout {
+    grid-template-columns:1fr;
+    gap:2rem
+  }
+  .form-row {
+    grid-template-columns:1fr
+  }
+}
+
