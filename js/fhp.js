@@ -5,7 +5,8 @@
     staff: 'fhp_funcionarios',
     tickets: 'fhp_mensagens',
     session: 'fhp_sessao',
-    plans: 'fhp_planos'
+    plans: 'fhp_planos',
+    payments: 'fhp_pagamentos'
   };
 
   const read = (key, fallback = []) => {
@@ -29,11 +30,11 @@
 
   if (!read(K.plans, []).length) write(K.plans, plans);
 
-  // Contas demonstrativas para administração, atendimento e suporte técnico.
+  // Contas de teste para administração, atendimento e suporte técnico.
   const initialStaff = [
     { email: 'silvaxxisaac@gmail.com', senha: 'Flamengo10', nome: 'Administrador FHP', cargo: 'Administrador', nivel: 'admin', status: 'Ativo' },
     { email: 'migueljorgesilva10@gmail.com', senha: 'Migueljorge135', nome: 'Funcionário', cargo: 'Funcionário de Atendimento', nivel: 'atendimento', status: 'Ativo' },
-    { email: 'tecnico@fhpfibra.demo', senha: 'Tecnico123', nome: 'Técnico Demonstrativo', cargo: 'Técnico de Internet', nivel: 'tecnico', status: 'Ativo' }
+    { email: 'tecnico@fhpfibra.demo', senha: 'Tecnico123', nome: 'Técnico de teste', cargo: 'Técnico de Internet', nivel: 'tecnico', status: 'Ativo' }
   ];
   const staff = read(K.staff, []);
   initialStaff.forEach(user => {
@@ -158,6 +159,12 @@
         if (ticket.cliente === oldEmail) ticket.cliente = customers[index].email;
       });
       write(K.tickets, conversations);
+
+      const savedOrders = read(K.payments, []);
+      savedOrders.forEach(order => {
+        if (order.cliente === oldEmail) order.cliente = customers[index].email;
+      });
+      write(K.payments, savedOrders);
     }
 
     write(K.session, { ...session(), email: customers[index].email, nome: customers[index].nome });
@@ -174,6 +181,225 @@
     write(K.clients, customers);
     return customers[index];
   };
+
+  /* Pagamentos.
+     Modo simulado (padrão): os pedidos ficam em localStorage e nenhum valor é cobrado.
+     Modo Mercado Pago: quando js/config.js aponta para o servidor (veja PAGAMENTOS.md),
+     a cobrança acontece no Mercado Pago e o servidor confirma o status.
+     Dados de cartão nunca são gravados aqui — no máximo a bandeira e os 4 últimos dígitos. */
+  const priceToNumber = value => Number(String(value || '').replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+  const money = value => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const orders = () => read(K.payments, []);
+  const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+  const pad = number => String(number).padStart(2, '0');
+  const monthOf = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+  const addMonths = (month, amount) => {
+    const [year, m] = month.split('-').map(Number);
+    return monthOf(new Date(year, m - 1 + amount, 1));
+  };
+  const monthName = month => {
+    const [year, m] = month.split('-').map(Number);
+    return `${MONTHS[m - 1]} de ${year}`;
+  };
+  // Dia de vencimento dentro do mês (dia 30 em fevereiro vira o último dia do mês).
+  const dueDate = (month, day) => {
+    const [year, m] = month.split('-').map(Number);
+    const last = new Date(year, m, 0).getDate();
+    return new Date(year, m - 1, Math.min(Number(day) || 10, last));
+  };
+  const planSlug = name => String(name || '').replace(/^FHP\s+/i, '').trim().toLowerCase().replace(/\s+/g, '-');
+
+  // Garante que o cliente tenha um id (contas antigas podem não ter).
+  const customerId = email => {
+    const customers = read(K.clients, []);
+    const customer = customers.find(user => user.email === email);
+    if (!customer) return null;
+    if (!customer.id) {
+      customer.id = crypto.randomUUID();
+      write(K.clients, customers);
+    }
+    return customer.id;
+  };
+  // Referência do pagamento: liga cliente, mês e plano (o servidor usa o mesmo formato).
+  const paymentRef = (id, month, planName) => `FHP:${String(id).toLowerCase()}:${month}:${planSlug(planName)}`;
+
+  const findOrder = id => {
+    const user = session();
+    const order = orders().find(item => item.id === id);
+    if (!user || !order) return null;
+    return user.nivel !== 'cliente' || order.cliente === user.email ? order : null;
+  };
+
+  // tipo "plano": contratação (1ª mensalidade). tipo "fatura": mensalidade de um mês do plano atual.
+  const createOrder = ({ plano, endereco, instalacao, vencimento, tipo = 'plano', competencia }) => {
+    const user = session();
+    if (!user || user.nivel !== 'cliente') throw Error('Entre com uma conta de cliente para assinar um plano.');
+    const plan = plans.find(item => item.nome === plano);
+    if (!plan || !priceToNumber(plan.valor)) throw Error('Este plano não está disponível para contratação online.');
+    const month = competencia || monthOf(new Date());
+    const all = orders();
+    let id;
+    do {
+      id = `FHP-${Math.floor(100000 + Math.random() * 900000)}`;
+    } while (all.some(item => item.id === id));
+    const order = {
+      id,
+      tipo,
+      competencia: month,
+      ref: paymentRef(customerId(user.email), month, plan.nome),
+      cliente: user.email,
+      nome: user.nome,
+      plano: { ...plan },
+      valor: priceToNumber(plan.valor),
+      endereco,
+      instalacao: instalacao || null,
+      vencimento: String(vencimento),
+      metodo: null,
+      status: 'Aguardando pagamento',
+      criadoEm: new Date().toISOString(),
+      pagoEm: null,
+      detalhes: {}
+    };
+    all.unshift(order);
+    write(K.payments, all);
+    return order;
+  };
+
+  const updateOrder = (id, changes) => {
+    const all = orders();
+    const order = all.find(item => item.id === id && item.cliente === session()?.email);
+    if (!order) throw Error('Pedido não encontrado.');
+    if (order.status === 'Pago') throw Error('Este pedido já foi pago.');
+    Object.assign(order, changes, { detalhes: { ...order.detalhes, ...(changes.detalhes || {}) } });
+    write(K.payments, all);
+    return order;
+  };
+
+  // Grava o plano do pedido na conta do cliente, pago ou ainda aguardando pagamento.
+  // Pagamento de fatura não muda o plano.
+  const applyOrderToCustomer = (order, paid) => {
+    if (order.tipo === 'fatura') return;
+    const customers = read(K.clients, []);
+    const customer = customers.find(user => user.email === order.cliente);
+    if (!customer) throw Error('Conta não encontrada.');
+    customer.enderecoInstalacao = order.endereco;
+    customer.plano = {
+      ...order.plano,
+      vencimento: order.vencimento,
+      status: paid ? 'Ativo' : 'Aguardando pagamento',
+      pagamento: paid ? 'Pago' : 'Pendente',
+      pedido: order.id,
+      inicio: order.competencia || monthOf(new Date(order.criadoEm))
+    };
+    write(K.clients, customers);
+  };
+
+  const confirmPayment = (id, detalhes = {}, paidAt) => {
+    const order = updateOrder(id, { status: 'Pago', pagoEm: paidAt || new Date().toISOString(), detalhes });
+    applyOrderToCustomer(order, true);
+    return order;
+  };
+
+  // Boleto ou Pix gerado para pagar depois: o plano fica reservado com pagamento pendente.
+  const deferPayment = id => {
+    const order = updateOrder(id, { status: 'Aguardando pagamento' });
+    applyOrderToCustomer(order, false);
+    return order;
+  };
+
+  /* Faturas mensais do plano atual: do mês da contratação até o mês atual,
+     mais a do mês seguinte quando faltam 10 dias ou menos para o vencimento. */
+  const invoices = email => {
+    const customer = read(K.clients, []).find(user => user.email === email);
+    const plan = customer?.plano;
+    if (!plan || !priceToNumber(plan.valor)) return [];
+    const firstOrder = orders().find(order => order.id === plan.pedido);
+    const start = plan.inicio || firstOrder?.competencia || monthOf(new Date(firstOrder?.criadoEm || Date.now()));
+    const now = new Date();
+    const id = customerId(email);
+    let last = monthOf(now);
+    const next = addMonths(last, 1);
+    if (dueDate(next, plan.vencimento) - now <= 10 * 86400000) last = next;
+    const list = [];
+    for (let month = start; month <= last && list.length < 36; month = addMonths(month, 1)) {
+      list.push({
+        competencia: month,
+        nome: monthName(month),
+        vencimento: dueDate(month, plan.vencimento),
+        primeira: month === start,
+        valor: priceToNumber(plan.valor),
+        plano: plan.nome,
+        ref: paymentRef(id, month, plan.nome)
+      });
+    }
+    return list.reverse();
+  };
+
+  // Situação de uma fatura pelos pedidos deste navegador (modo simulado).
+  const localInvoiceStatus = ref => {
+    const related = orders().filter(order => order.ref === ref);
+    const paid = related.find(order => order.status === 'Pago');
+    if (paid) return { status: 'pago', metodo: paid.metodo, pagoEm: paid.pagoEm, pedido: paid.id };
+    const waiting = related.find(order => order.status === 'Aguardando pagamento' && order.detalhes.boletoLinha);
+    if (waiting) return { status: 'processando', metodo: 'boleto', pedido: waiting.id };
+    return null;
+  };
+
+  /* Ligação com o servidor de pagamentos (Mercado Pago). */
+  const config = window.FHP_CONFIG || {};
+  const apiBase = String(config.apiUrl || '').replace(/\/+$/, '');
+  let paymentModePromise = null;
+
+  const api = async (path, options = {}) => {
+    const response = await fetch(apiBase + path, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      signal: AbortSignal.timeout(options.timeout || 90000)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw Error(data.error || 'O servidor de pagamentos não respondeu. Tente de novo em instantes.');
+    return data;
+  };
+
+  /* Resolve o modo de pagamento:
+     - { modo: 'simulado' } quando não há servidor;
+     - { modo: 'mercadopago', ambiente } quando o servidor está configurado;
+     - { modo: 'indisponivel', erro } quando o site aponta para um servidor que não responde. */
+  const paymentMode = () => {
+    if (paymentModePromise) return paymentModePromise;
+    const configured = !!apiBase;
+    const sameOrigin = !configured && /^https?:$/.test(location.protocol) && !/\.github\.io$/i.test(location.hostname);
+    paymentModePromise = (async () => {
+      if (!configured && !sameOrigin) return { modo: 'simulado' };
+      try {
+        // Servidor gratuito pode levar até 1 minuto para acordar.
+        const data = await api('/api/pagamentos/config', { timeout: configured ? 90000 : 4000 });
+        if (data.ativo) return { modo: 'mercadopago', ambiente: data.ambiente };
+        return configured ? { modo: 'indisponivel', erro: 'O servidor de pagamentos está sem as credenciais do Mercado Pago.' } : { modo: 'simulado' };
+      } catch (error) {
+        return configured ? { modo: 'indisponivel', erro: 'Não foi possível falar com o servidor de pagamentos. Tente de novo em instantes.' } : { modo: 'simulado' };
+      }
+    })();
+    return paymentModePromise;
+  };
+
+  const startCheckout = ({ order, retorno }) => api('/api/pagamentos/preferencia', {
+    method: 'POST',
+    body: JSON.stringify({
+      cliente: customerId(order.cliente),
+      competencia: order.competencia,
+      plano: order.plano.nome,
+      tipo: order.tipo,
+      pagador: { nome: order.nome, email: order.cliente },
+      retorno
+    })
+  });
+
+  const remoteStatus = (refs, atualizar = false) => api('/api/pagamentos/status', {
+    method: 'POST',
+    body: JSON.stringify({ refs, atualizar })
+  }).then(data => data.status || {});
 
   const send = (subject, text) => {
     const user = session();
@@ -230,7 +456,7 @@
     return employee;
   };
 
-  // Recuperação local demonstrativa: sem um serviço de e-mail, o código é exibido
+  // Recuperação local de teste: sem um serviço de e-mail, o código é exibido
   // numa caixa de entrada simulada na página de recuperação.
   const requestPasswordReset = email => {
     const normalizedEmail = email.trim().toLowerCase();
@@ -274,6 +500,8 @@
 
   window.FHP = {
     K, read, write, session, plans, esc: escapeHtml, login, logout, signup, updateClient, contract, send, reply, closeTicket, setStaffLevel,
+    priceToNumber, money, orders, findOrder, createOrder, updateOrder, confirmPayment, deferPayment,
+    monthOf, monthName, invoices, localInvoiceStatus, paymentRef, paymentMode, startCheckout, remoteStatus,
     cadastrarCliente: signup,
     fazerLogin: login,
     fazerLogout: logout,
@@ -337,18 +565,8 @@
 
     document.querySelectorAll('[data-assinar]').forEach(button => {
       button.addEventListener('click', () => {
-        const name = button.dataset.assinar;
-        const user = session();
-        const registeredCustomers = read(K.clients, []);
-        if (!user) {
-          location.href = `${registeredCustomers.length ? 'login.html' : 'cadastro.html'}?plano=${encodeURIComponent(name)}`;
-          return;
-        }
-        if (user.nivel !== 'cliente') {
-          location.href = 'painel.html';
-          return;
-        }
-        location.href = `painel.html?contratar=${encodeURIComponent(name)}`;
+        // O checkout cuida de cadastro, login, endereço de instalação e pagamento.
+        location.href = `checkout.html?plano=${encodeURIComponent(button.dataset.assinar)}`;
       });
     });
   });

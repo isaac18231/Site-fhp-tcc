@@ -1,0 +1,13 @@
+{
+  "name": "fhp-fibra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site FHP Fibra com assistente e pagamentos Mercado Pago",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

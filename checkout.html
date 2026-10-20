@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Assinatura e pagamento dos planos FHP Fibra.">
+<meta name="robots" content="noindex">
+<title>Finalizar assinatura | FHP Fibra</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/checkout.css">
+</head>
+<body class="checkout-body">
+
+<header class="checkout-header">
+  <a class="brand" href="index.html"><span>FHP</span> FIBRA</a>
+  <span class="demo-tag" id="demo-tag">CHECKOUT</span>
+  <a class="back-link" href="planos.html">← Voltar aos planos</a>
+</header>
+
+<p class="demo-banner" id="demo-banner" role="note">
+  <strong>Ambiente de teste.</strong> Nenhum valor é cobrado e nada sai deste navegador. Não informe dados reais de cartão.
+</p>
+
+<main class="checkout">
+
+  <!-- Estados em que a compra não pode seguir (plano inválido, conta de equipe etc.) -->
+  <section class="state-card" id="checkout-state" hidden></section>
+
+  <div class="checkout-flow" id="checkout-flow" hidden>
+    <h1 id="checkout-title">Finalizar assinatura</h1>
+
+    <ol class="stepper" id="stepper" aria-label="Etapas da assinatura">
+      <li data-step="1"><button type="button"><span class="num">1</span><span class="label">Seus dados</span></button></li>
+      <li data-step="2"><button type="button"><span class="num">2</span><span class="label">Instalação</span></button></li>
+      <li data-step="3"><button type="button"><span class="num">3</span><span class="label">Pagamento</span></button></li>
+      <li data-step="4"><button type="button"><span class="num">4</span><span class="label">Confirmação</span></button></li>
+    </ol>
+
+    <!-- 1. Seus dados -->
+    <section class="step" id="step-1" hidden>
+      <h2 tabindex="-1">Seus dados</h2>
+
+      <div class="known-account" id="known-account" hidden>
+        <div class="avatar" id="known-avatar" aria-hidden="true"></div>
+        <div>
+          <strong id="known-name"></strong>
+          <span id="known-email"></span>
+        </div>
+        <button class="text-action" type="button" id="switch-account">Trocar de conta</button>
+      </div>
+      <div class="step-actions" id="known-actions" hidden>
+        <button class="btn btn-primary" type="button" data-next="2">Continuar</button>
+      </div>
+
+      <form id="account-form" novalidate hidden>
+        <p class="step-intro">Crie sua conta FHP para acompanhar o plano e as solicitações.
+          <a id="login-link" href="login.html">Já tenho conta</a>
+        </p>
+        <label class="field">Nome completo
+          <input name="nome" autocomplete="name" required>
+          <small class="field-error"></small>
+        </label>
+        <div class="field-row">
+          <label class="field">E-mail
+            <input name="email" type="email" autocomplete="email" required>
+            <small class="field-error"></small>
+          </label>
+          <label class="field">Celular com DDD
+            <input name="telefone" inputmode="numeric" autocomplete="tel-national" placeholder="(21) 90000-0000" required>
+            <small class="field-error"></small>
+          </label>
+        </div>
+        <label class="field">CPF
+          <input name="cpf" inputmode="numeric" placeholder="000.000.000-00" required>
+          <small class="field-error"></small>
+        </label>
+        <div class="field-row">
+          <label class="field">Crie uma senha
+            <input name="senha" type="password" autocomplete="new-password" minlength="8" required>
+            <small class="field-hint">Mínimo de 8 caracteres.</small>
+            <small class="field-error"></small>
+          </label>
+          <label class="field">Confirme a senha
+            <input name="confirmar" type="password" autocomplete="new-password" required>
+            <small class="field-error"></small>
+          </label>
+        </div>
+        <p class="form-error" role="alert"></p>
+        <div class="step-actions">
+          <button class="btn btn-primary" type="submit">Criar conta e continuar</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 2. Instalação -->
+    <section class="step" id="step-2" hidden>
+      <h2 tabindex="-1">Endereço de instalação</h2>
+      <form id="install-form" novalidate>
+        <div class="field-row narrow-first">
+          <label class="field">CEP
+            <input name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" required>
+            <small class="field-error"></small>
+          </label>
+          <label class="field">Rua e número
+            <input name="logradouro" autocomplete="address-line1" required>
+            <small class="field-error"></small>
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span>Complemento <span class="optional">(opcional)</span></span>
+            <input name="complemento" autocomplete="address-line2" placeholder="Apto, bloco, referência">
+          </label>
+          <label class="field">Bairro
+            <input name="bairro" autocomplete="address-level3" required>
+            <small class="field-error"></small>
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field">Cidade
+            <input name="cidade" autocomplete="address-level2" value="Rio de Janeiro" required>
+            <small class="field-error"></small>
+          </label>
+          <label class="field">Vencimento das mensalidades
+            <select name="vencimento" required>
+              <option value="5">Todo dia 5</option>
+              <option value="10" selected>Todo dia 10</option>
+              <option value="15">Todo dia 15</option>
+              <option value="20">Todo dia 20</option>
+              <option value="25">Todo dia 25</option>
+              <option value="30">Todo dia 30</option>
+            </select>
+          </label>
+        </div>
+        <div class="step-actions">
+          <button class="btn btn-ghost" type="button" data-back="1">Voltar</button>
+          <button class="btn btn-primary" type="submit">Ir para o pagamento</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 3. Pagamento -->
+    <section class="step" id="step-3" hidden>
+      <h2 tabindex="-1" id="pay-title">Pagamento da 1ª mensalidade</h2>
+
+      <!-- Enquanto descobre se o site cobra pelo Mercado Pago ou em modo simulado -->
+      <div class="method-panel" id="panel-loading">
+        <p class="pay-status"><span class="dot" aria-hidden="true"></span> <span id="loading-text">Preparando o pagamento…</span></p>
+      </div>
+
+      <fieldset class="methods" id="methods" hidden>
+        <legend>Como você quer pagar?</legend>
+        <label class="method">
+          <input type="radio" name="metodo" value="pix" checked>
+          <span class="method-body"><b>Pix</b><small>Aprovação na hora</small></span>
+        </label>
+        <label class="method">
+          <input type="radio" name="metodo" value="cartao">
+          <span class="method-body"><b>Cartão de crédito</b><small>Aprovação na hora</small></span>
+        </label>
+        <label class="method">
+          <input type="radio" name="metodo" value="boleto">
+          <span class="method-body"><b>Boleto</b><small>Compensa em até 3 dias úteis</small></span>
+        </label>
+      </fieldset>
+
+      <label class="terms">
+        <input type="checkbox" id="terms">
+        <span>Li e aceito as condições de contratação deste plano de teste.</span>
+      </label>
+      <p class="form-error" id="terms-error" role="alert"></p>
+
+      <!-- Mercado Pago (cobrança real) -->
+      <div class="method-panel" id="panel-mp" hidden>
+        <p>Você vai para o ambiente seguro do Mercado Pago, escolhe como pagar e depois volta para cá automaticamente.</p>
+        <ul class="mp-methods" aria-label="Formas de pagamento aceitas">
+          <li>Pix</li>
+          <li>Cartão de crédito</li>
+          <li>Boleto</li>
+        </ul>
+        <button class="btn btn-primary" type="button" id="mp-pay">Pagar com Mercado Pago</button>
+        <p class="demo-note" id="mp-note">Os dados de pagamento são digitados no site do Mercado Pago; a FHP não recebe o número do seu cartão.</p>
+      </div>
+
+      <!-- Pix -->
+      <div class="method-panel" id="panel-pix" hidden>
+        <div id="pix-start">
+          <p>Geramos um QR Code válido por 10 minutos. Depois de pagar, a confirmação aparece aqui mesmo.</p>
+          <button class="btn btn-primary" type="button" id="pix-generate">Gerar código Pix</button>
+        </div>
+        <div class="pix-result" id="pix-result" hidden>
+          <div class="qr" id="pix-qr" role="img" aria-label="QR Code Pix de teste"></div>
+          <div class="pix-info">
+            <p class="pay-status"><span class="dot" aria-hidden="true"></span> Aguardando pagamento · expira em <b id="pix-timer">10:00</b></p>
+            <label class="field">Pix copia e cola
+              <span class="copy-row">
+                <input id="pix-code" readonly>
+                <button class="btn btn-ghost" type="button" data-copy="#pix-code">Copiar</button>
+              </span>
+            </label>
+            <p class="demo-note">Modo de teste: este código Pix não é válido para pagamento.</p>
+            <button class="btn btn-primary" type="button" id="pix-confirm">Simular pagamento confirmado</button>
+          </div>
+        </div>
+        <div id="pix-expired" hidden>
+          <p class="form-error visible">O código Pix expirou.</p>
+          <button class="btn btn-primary" type="button" id="pix-regenerate">Gerar novo código</button>
+        </div>
+      </div>
+
+      <!-- Cartão -->
+      <div class="method-panel" id="panel-cartao" hidden>
+        <form id="card-form" novalidate autocomplete="off">
+          <label class="field">Número do cartão
+            <span class="card-number">
+              <input name="numero" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="23" required>
+              <span class="brand-tag" id="card-brand" aria-live="polite"></span>
+            </span>
+            <small class="field-error"></small>
+          </label>
+          <label class="field">Nome impresso no cartão
+            <input name="titular" required>
+            <small class="field-error"></small>
+          </label>
+          <div class="field-row">
+            <label class="field">Validade
+              <input name="validade" inputmode="numeric" placeholder="MM/AA" maxlength="5" required>
+              <small class="field-error"></small>
+            </label>
+            <label class="field">CVV
+              <input name="cvv" type="password" inputmode="numeric" placeholder="000" maxlength="4" required>
+              <small class="field-error"></small>
+            </label>
+          </div>
+          <details class="test-data">
+            <summary>Cartões de teste</summary>
+            <ul>
+              <li><code>4111 1111 1111 1111</code> aprovado (Visa)</li>
+              <li><code>5555 5555 5555 4444</code> aprovado (Mastercard)</li>
+              <li><code>4000 0000 0000 0002</code> recusado pelo emissor</li>
+              <li><code>4000 0000 0000 9995</code> limite insuficiente</li>
+            </ul>
+            <p>Use qualquer nome, validade futura e CVV de 3 dígitos.</p>
+          </details>
+          <p class="form-error" id="card-error" role="alert"></p>
+          <button class="btn btn-primary" type="submit" id="card-pay">Pagar</button>
+        </form>
+      </div>
+
+      <!-- Boleto -->
+      <div class="method-panel" id="panel-boleto" hidden>
+        <div id="boleto-start">
+          <p>O boleto vence em 3 dias. O plano é ativado quando o pagamento for compensado.</p>
+          <button class="btn btn-primary" type="button" id="boleto-generate">Gerar boleto</button>
+        </div>
+        <div id="boleto-result" hidden>
+          <article class="boleto" id="boleto-card"></article>
+          <p class="demo-note">Modo de teste: este boleto não é válido para pagamento.</p>
+          <div class="step-actions wrap">
+            <button class="btn btn-ghost" type="button" id="boleto-print">Imprimir boleto</button>
+            <button class="btn btn-ghost" type="button" id="boleto-later">Concluir e pagar depois</button>
+            <button class="btn btn-primary" type="button" id="boleto-confirm">Simular compensação</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="form-error" id="pay-error" role="alert"></p>
+      <div class="step-actions" id="pay-actions">
+        <button class="btn btn-ghost" type="button" data-back="2">Voltar</button>
+      </div>
+    </section>
+
+    <!-- 4. Confirmação -->
+    <section class="step" id="step-4" hidden>
+      <div id="confirmation"></div>
+    </section>
+  </div>
+
+  <aside class="summary" id="summary" hidden aria-label="Resumo do pedido"></aside>
+</main>
+
+<p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+<script src="js/config.js"></script>
+<script src="js/fhp.js"></script><script src="js/whatsapp.js"></script>
+<script src="js/qrcode.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>

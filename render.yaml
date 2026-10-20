@@ -1,0 +1,23 @@
+# Configuração para o Render (render.com): New > Blueprint e escolha este repositório.
+# As chaves secretas NÃO ficam aqui: o Render pede os valores na hora de criar.
+services:
+  - type: web
+    name: fhp-fibra
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/pagamentos/config
+    envVars:
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false
+      - key: MP_AMBIENTE
+        value: teste
+      - key: SITE_ORIGINS
+        value: https://isaac18231.github.io
+      - key: PUBLIC_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

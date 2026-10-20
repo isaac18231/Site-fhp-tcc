@@ -5,11 +5,11 @@ const topics = [
 { k: ['oi','ola','bom dia','boa tarde','boa noite','e ai','hello'],
 r: 'Olá! 👋 Sou o assistente virtual da FHP Fibra. Posso falar sobre planos, suporte, contato e Área do Login. Como posso ajudar?' },
 { k: ['plano','planos','valor','preco','quanto custa','mega','giga','velocidade'],
-r: `Nossos planos residenciais (valores demonstrativos):<br>• <b>FHP Start</b> — 300 Mega, R$ 79,90/mês<br>• <b>FHP Turbo</b> — 500 Mega, R$ 99,90/mês ⭐<br>• <b>FHP Ultra</b> — 700 Mega, R$ 119,90/mês<br>• <b>FHP Gamer</b> — 1 Giga, R$ 149,90/mês<br>${L('planos.html','Ver todos os planos')}` },
+r: `Nossos planos residenciais:<br>• <b>FHP Start</b> — 300 Mega, R$ 79,90/mês<br>• <b>FHP Turbo</b> — 500 Mega, R$ 99,90/mês ⭐<br>• <b>FHP Ultra</b> — 700 Mega, R$ 119,90/mês<br>• <b>FHP Gamer</b> — 1 Giga, R$ 149,90/mês<br>${L('planos.html','Ver todos os planos')}` },
 { k: ['empresa','empresarial','business','negocio','cnpj'],
 r: `Para empresas temos o <b>Business 500</b>, <b>Business 700</b> e <b>Business 1 Giga</b>. ${L('planos.html#empresarial','Ver planos empresariais')} ou ${L('fale-conosco.html?assunto=Planos%20empresariais','fale com a equipe')}.` },
 { k: ['contratar','assinar','quero','interesse','instalacao','instalar'],
-r: `Que bom! Escolha um plano em ${L('planos.html','Planos')} e clique em "ASSINAR", ou envie uma mensagem em ${L('fale-conosco.html','Fale Conosco')}. A instalação está inclusa nos planos residenciais.` },
+r: `Que bom! Escolha um plano em ${L('planos.html','Planos')} e clique em "ASSINAR", ou ${window.FHPWhats?.ativo ? `chame a equipe no <a href="${window.FHPWhats.link('Oi! Vim pelo site e quero contratar a internet da FHP Fibra.')}" target="_blank" rel="noopener">WhatsApp ${window.FHPWhats.numero}</a>` : `envie uma mensagem em ${L('fale-conosco.html','Fale Conosco')}`}. A instalação está inclusa nos planos residenciais.` },
 { k: ['lenta','lento','caiu','sem internet','nao funciona','travando','oscilando','suporte','problema','wifi','wi-fi','roteador'],
 r: `Sinto muito pelo problema! Tente isto:<br>1. Desligue o roteador da tomada por 1 minuto e ligue de novo.<br>2. Confira se os cabos estão bem encaixados.<br>3. Veja se há luz vermelha no equipamento.<br>Se continuar, ${L('fale-conosco.html?assunto=Suporte','abra um pedido de suporte')}.` },
 { k: ['login','entrar','area do cliente','senha','acesso','painel','fatura','boleto','2 via','segunda via'],
@@ -17,13 +17,13 @@ r: `Acesse a ${L('login.html','Área do Login')} para ver seu plano, dados e sol
 { k: ['fibra','optica','tecnologia'],
 r: 'A fibra óptica transmite dados por pulsos de luz, com alta velocidade e estabilidade. É a tecnologia base de todos os nossos planos. ✨' },
 { k: ['onde','cobertura','regiao','bairro','zona oeste','atende','endereco'],
-r: `A FHP Fibra atua na <b>Zona Oeste do Rio de Janeiro</b>. Para saber se atendemos seu endereço, ${L('fale-conosco.html?assunto=Cobertura','fale com a equipe')}.` },
+r: `A FHP Fibra atua na <b>Zona Oeste do Rio de Janeiro</b>. Para saber se atendemos seu endereço, ${window.FHPWhats?.ativo ? `<a href="${window.FHPWhats.link('Oi! Quero saber se a FHP Fibra atende o meu endereço.')}" target="_blank" rel="noopener">mande seu CEP no WhatsApp</a>` : L('fale-conosco.html?assunto=Cobertura','fale com a equipe')}.` },
 { k: ['quem somos','sobre','missao','visao','valores','empresa fhp'],
 r: `A FHP é uma provedora de fibra óptica focada em pessoas, empresas e comunidades. Conheça mais em ${L('quem-somos.html','Quem Somos')}.` },
 { k: ['contato','falar','atendente','humano','telefone','email','mensagem','whatsapp'],
-r: `Para falar com a equipe, use o ${L('fale-conosco.html','formulário de Fale Conosco')}. Este site é demonstrativo, então não há atendimento real por telefone.` },
+r: window.FHPWhats?.ativo ? `Fale com a equipe pelo <a href="${window.FHPWhats.link('Oi! Vim pelo site da FHP Fibra e quero falar com a equipe.')}" target="_blank" rel="noopener">WhatsApp ${window.FHPWhats.numero}</a> ou pelo ${L('fale-conosco.html','formulário de Fale Conosco')}.` : `Para falar com a equipe, use o ${L('fale-conosco.html','formulário de Fale Conosco')}. Para atendimento, entre em contato pelos canais oficiais da FHP Fibra.` },
 { k: ['horario','funcionamento','aberto'],
-r: 'Este é um projeto demonstrativo, então não há horário de atendimento oficial definido.' },
+r: 'Consulte nossos canais oficiais para verificar os horários de atendimento.' },
 { k: ['obrigado','obrigada','valeu','thanks','tchau'],
 r: 'Por nada! Se precisar de mais alguma coisa, é só chamar. 💜' }
 ];
@@ -38,11 +38,11 @@ const wrap = document.createElement('div');
 wrap.innerHTML = `
       <button class="bot-fab" aria-label="Abrir assistente virtual" aria-expanded="false">💬</button>
       <section class="bot-panel" role="dialog" aria-label="Assistente virtual FHP">
-        <header class="bot-head"><span class="bot-avatar">🤖</span><div><b>Assistente FHP</b><small class="bot-status">● Online · Demonstrativo</small></div><button class="bot-close" aria-label="Fechar">✕</button></header>
+        <header class="bot-head"><span class="bot-avatar">🤖</span><div><b>Assistente FHP</b><small class="bot-status">● Online</small></div><button class="bot-close" aria-label="Fechar">✕</button></header>
         <div class="bot-body" aria-live="polite"></div>
         <div class="bot-chips"></div>
         <form class="bot-form"><input type="text" placeholder="Digite sua dúvida..." aria-label="Mensagem" autocomplete="off"><button type="submit">Enviar</button></form>
-        <p class="bot-note">Respostas de IA podem conter erros. Projeto demonstrativo.</p>
+        <p class="bot-note">Respostas automáticas podem conter erros.</p>
       </section>`;
 document.body.append(...wrap.children);
 const fab = document.querySelector('.bot-fab'), panel = document.querySelector('.bot-panel');

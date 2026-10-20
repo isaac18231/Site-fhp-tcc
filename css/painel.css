@@ -443,3 +443,15 @@ body {
   caret-color:#fff
 }
 
+
+/* Faturas */
+.pill.warn{background:rgba(255,190,80,.15);color:#ffe6b3}
+.pill.danger{background:rgba(255,120,150,.15);color:#ffb0c6}
+.pill.muted{background:rgba(255,255,255,.08);color:#d9cfe6}
+#panel-content .btn-small{min-height:34px;padding:.4rem .8rem;font-size:.85rem}
+#panel-content .btn-ghost-panel{display:inline-flex;align-items:center;min-height:40px;padding:.6rem 1rem;border:1px solid #8d5bbb;border-radius:9px;background:transparent;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+#panel-content .btn-ghost-panel:hover{background:rgba(144,65,235,.18)}
+.text-link{color:#d7a8ff;text-decoration:underline}
+.muted-text{color:var(--muted);font-size:.85rem}
+.data-table td small{color:var(--muted)}
+.warn-text{color:#ffe6b3}
